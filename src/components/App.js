@@ -1,9 +1,11 @@
 import React, { Component } from 'react';
-
+import axios from 'axios';
 import './App.css';
+import Post from './Post/Post'
 
 import Header from './Header/Header';
 import Compose from './Compose/Compose';
+import {ToastContainer, toast} from 'react-toastify'
 
 class App extends Component {
   constructor() {
@@ -19,18 +21,33 @@ class App extends Component {
   }
   
   componentDidMount() {
+    axios.get(`https://practiceapi.devmountain.com/api/posts`).then(results =>{
+      toast.success('Success Post')
+      this.setState({posts: results.data})
+    })
 
   }
 
-  updatePost() {
+  updatePost(id, text) {
+    axios.put(`https://practiceapi.devmountain.com/api/posts?id=${ id }`, { text })
+    .then(results =>{
+      this.setState({posts: results.data})
+  })
   
   }
 
-  deletePost() {
+  deletePost(id) {
+    axios.delete(`https://practiceapi.devmountain.com/api/posts?id=${ id }`).then(results =>{
+      toast.success('Success Delete')
+      this.setState({posts: results.data})
+    })
 
   }
 
-  createPost() {
+  createPost(text) {
+    axios.post(`https://practiceapi.devmountain.com/api/posts`, { text }).then(results =>{
+      this.setState({posts: results.data})
+    })
 
   }
 
@@ -39,11 +56,23 @@ class App extends Component {
 
     return (
       <div className="App__parent">
+        <ToastContainer/>
         <Header />
 
         <section className="App__content">
 
-          <Compose />
+          <Compose createPostFN={this.createPost}/>
+          {
+            posts.map(post => (
+              <Post key={post.id}
+              text={post.text}
+              date={post.date}
+              id={post.id}
+              updatePostFN={this.updatePost}
+              deletePostFN={this.deletePost}/>
+              
+            ))
+          }
           
         </section>
       </div>
